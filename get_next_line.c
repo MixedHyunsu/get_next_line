@@ -11,7 +11,7 @@
 /* ************************************************************************** */
 
 #include "get_next_line.h"
-#define BUFFER_SIZE 28
+#define BUFFER_SIZE 3
 
 
 #include <unistd.h>
@@ -21,15 +21,20 @@
 
 char	*get_next_line(int fd)
 {
-	char	*word;
+	char	*buffer[BUFFER_SIZE + 1];
+	long	bytes_read;
+	long	total_bytes_read = 0;
 	int	nr;
 
-	nr = read(fd, word, BUFFER_SIZE);
-//	if (nr == -1)
-//		return (NULL);
+	while ((bytes_read = read(fd, buffer, BUFFER_SIZE)) > 0)
+	{
+		buffer[bytes_read] = '/0';
+		total_bytes_read += bytes_read;
+	}
+
 
 	printf("%d\n", nr);
-	return (word);
+	return (buffer);
 }
 
 
