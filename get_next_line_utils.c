@@ -55,23 +55,23 @@ char	*ft_strdup(const char *s1)
         return (str);
 }
 
-char	*ft_substr(char const *s, unsigned int start, size_t len)
+size_t  ft_strlcpy(char *dest, const char *src, size_t size)
 {
-        char	*str;
-        size_t	s_len;
+        size_t  i;
 
-        if (s == NULL)
-                return (NULL);
-        s_len = ft_strlen(s);
-        if (start >= s_len)
-                return (ft_strdup(""));
-        if (start + len > s_len)
-                len = s_len - start;
-        str = (char *)malloc(sizeof(char) * (len + 1));
-        if (str == NULL)
-                return (NULL);
-        ft_strlcpy(str, s + start, len + 1);
-        return (str);
+        i = 0;
+        if (size == 0)
+                return (ft_strlen((char *)src));
+        else
+        {
+                while (i < size - 1 && src[i])
+                {
+                        dest[i] = src[i];
+                        i ++;
+                }
+                dest[i] = '\0';
+                return (ft_strlen((char *)src));
+        }
 }
 
 char	*ft_strjoin(char const *s1, char const *s2)
