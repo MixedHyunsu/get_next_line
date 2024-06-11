@@ -14,21 +14,21 @@
 
 char	*ft_substr(char const *s, unsigned int start, size_t len)
 {
-		char	*str;
-		size_t	s_len;
+	char	*str;
+	size_t	s_len;
 
-		if (s == NULL)
-			return (NULL);
-		s_len = ft_strlen(s);
-        if (start >= s_len)
-                return (ft_strdup(""));
-        if (start + len > s_len)
-                len = s_len - start;
-        str = (char *)malloc(sizeof(char) * (len + 1));
-        if (str == NULL)
-                return (NULL);
-        ft_strlcpy(str, s + start, len + 1);
-        return (str);
+	if (s == NULL)
+		return (NULL);
+	s_len = ft_strlen(s);
+	if (start >= s_len)
+    	return (ft_strdup(""));
+    if (start + len > s_len)
+    	len = s_len - start;
+    str = (char *)malloc(sizeof(char) * (len + 1));
+	if (str == NULL)
+        return (NULL);
+	ft_strlcpy(str, s + start, len + 1);
+    return (str);
 }
 
 int	fill_line_buffer(char **line_buffer, char *buffer)
@@ -41,7 +41,7 @@ int	fill_line_buffer(char **line_buffer, char *buffer)
 	{
 		length = ft_strlen(buffer) - ft_strlen(newline_pos);
 		*line_buffer = ft_substr(buffer, 0, length + 1);
-		return(length + 1);
+		return (length + 1);
 	}
 	else if ((buffer == NULL) || (ft_strlen(buffer) < BUFFER_SIZE))
 	{
@@ -80,7 +80,6 @@ char	*get_next_line(int fd)
 
 	if (fd < 0 || BUFFER_SIZE < 1 || !(buffer = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1))))
 		return (NULL);
-	
 	while ((read_size = read(fd, buffer, BUFFER_SIZE)) >= 0)
 	{
 		buffer[read_size] = '\0';
