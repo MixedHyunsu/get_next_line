@@ -40,22 +40,23 @@ int	fill_line_buffer(char **line_buffer, char *buffer)
 	if (newline_pos != NULL) // \n 발견한경우.
 	{
 		length = ft_strlen(buffer) - ft_strlen(newline_pos);
-		*line_buffer = ft_substr(buffer, 0, length);
+		*line_buffer = ft_substr(buffer, 0, length + 1);
 		return(length + 1);
 	}
-	else if (ft_strlen(buffer) < BUFFER_SIZE)
+	else if ((buffer == NULL) || (ft_strlen(buffer) < BUFFER_SIZE))
 	{
-		*line_buffer = ft_strdup(buffer);
+		*line_buffer = ft_strjoin(buffer, "\n");
 		return (0); // \0 으로 문서 끝남
 	}
 	else
 	{
+		*line_buffer = NULL;
 		*line_buffer = ft_strdup(buffer);
 		return (-1); // \n 발견 못하고 문서도 안끝남
 	}
 }
 
-void	set_line(char **left_c, char *line_buffer, int i)
+void	set_line(char **left_c, char *line_buffer)
 {
 	char	*tmp;
 
@@ -67,13 +68,8 @@ void	set_line(char **left_c, char *line_buffer, int i)
 		*left_c = NULL;
 		*left_c = tmp;
 	}
-	if (i >= 0)
-	{
-		*left_c = NULL;
-		*left_c = ft_strjoin(tmp, "\n");
-	}
 }
-#include<stdio.h>
+
 char	*get_next_line(int fd)
 {
 	char		*buffer;
@@ -83,25 +79,25 @@ char	*get_next_line(int fd)
 	int			i;
 
 	if (fd < 0 || BUFFER_SIZE < 1 || !(buffer = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1))))
-		return (0);
+		return (NULL);
 
-	while ((read_size = read(fd, buffer, BUFFER_SIZE)) > 0)
+	while ((read_size = read(fd, buffer, BUFFER_SIZE)) >= 0)
 	{
 		buffer[read_size] = '\0';
 		i = fill_line_buffer(&line_buffer, buffer);
-		printf("%d", i);
-		set_line(&left_c, line_buffer, i);
-		if (i >= 0)
+		set_line(&left_c, line_buffer);
+		if ((i >= 0) || (read_size == 0))
 		{
 			free(buffer);
 			return (left_c);
 		}
 	}
 	free(buffer);
-    return (0);
+    return (NULL);
 }
 
 
+/*
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -123,7 +119,6 @@ int main(void)
 
 }
 
-/*
 int main(void)
 {
     int fd;
@@ -149,3 +144,4 @@ int main(void)
     return (0);
 }
 */
+
