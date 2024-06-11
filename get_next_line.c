@@ -31,66 +31,81 @@ char	*ft_substr(char const *s, unsigned int start, size_t len)
         return (str);
 }
 
-int	fill_line_buffer(char **line, char *buffer)
+int	fill_line_buffer(char **line_buffer, char *buffer)
 {
-	char	*str;
 	size_t	length;
+	char	*newline_pos;
 	
-	if (ft_strchr(buffer, '\n') != NULL)
+	newline_pos = ft_strchr(buffer, '\n');
+	if (newline_pos != NULL) // \n 발견한경우.
 	{
-		length = ft_strchr(buffer, '\n') - buffer;
-		str = ft_substr(buffer, 0, length);
-		*line = str;
-		return(0);
+		length = ft_strlen(buffer) - ft_strlen(newline_pos);
+		*line_buffer = ft_substr(buffer, 0, length);
+		return(length + 1);
+	}
+	else if (ft_strlen(buffer) < BUFFER_SIZE)
+	{
+		*line_buffer = ft_strdup(buffer);
+		return (0); // \0 으로 문서 끝남
 	}
 	else
 	{
-		str = ft_strdup(buffer);
-		*line = str;
-		return(-1);
+		*line_buffer = ft_strdup(buffer);
+		return (-1); // \n 발견 못하고 문서도 안끝남
 	}
 }
 
-char	*set_line(char *left_c, char *line_buffer)
+void	set_line(char **left_c, char *line_buffer, int i)
 {
-	char	*line;
+	char	*tmp;
 
-	if (!left_c)
-		line = line_buffer;
+	if (*left_c == NULL)
+		*left_c = ft_strdup(line_buffer);
 	else
-		line = ft_strjoin(left_c, line_buffer);
-	return (line);
+	{
+		tmp = ft_strjoin(*left_c, line_buffer);
+		*left_c = NULL;
+		*left_c = tmp;
+	}
+	if (i >= 0)
+	{
+		*left_c = NULL;
+		*left_c = ft_strjoin(tmp, "\n");
+	}
 }
-
+#include<stdio.h>
 char	*get_next_line(int fd)
 {
 	char		*buffer;
 	char		*line_buffer;
-	char		*line;
 	static char	*left_c;
 	ssize_t		read_size;
 	int			i;
 
-	if (fd < 0 || BUFFER_SIZE < 1 || !(buffer = (char *)malloc(BUFFER_SIZE + 1)))
-		return (NULL);
+	if (fd < 0 || BUFFER_SIZE < 1 || !(buffer = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1))))
+		return (0);
 
 	while ((read_size = read(fd, buffer, BUFFER_SIZE)) > 0)
 	{
 		buffer[read_size] = '\0';
 		i = fill_line_buffer(&line_buffer, buffer);
-		if (i == 0)
+		printf("%d", i);
+		set_line(&left_c, line_buffer, i);
+		if (i >= 0)
 		{
-			line = set_line(left_c, line_buffer);
-			return(line);
+			free(buffer);
+			return (left_c);
 		}
-		line = set_line(left_c, line_buffer);
-		left_c = line;
 	}
-	return (line);
+	free(buffer);
+    return (0);
 }
 
 
-/*
+#include <fcntl.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 int main(void)
 {
 	int fd;
@@ -101,16 +116,14 @@ int main(void)
 	{
 		char	*line = get_next_line(fd);
 		printf("%s", line);
+		printf("hi\n");
 		free(line);
 		close(fd);
 	}
-	return(0);
+
 }
 
-#include <fcntl.h>
-#include <stdio.h>
-#include <stdlib.h>
-
+/*
 int main(void)
 {
     int fd;
