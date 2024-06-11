@@ -6,7 +6,7 @@
 /*   By: hyunski2 <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 13:37:32 by hyunski2          #+#    #+#             */
-/*   Updated: 2024/05/02 13:37:36 by hyunski2         ###   ########.fr       */
+/*   Updated: 2024/06/11 16:17:07 by hyunski2         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,12 +14,12 @@
 
 char	*ft_substr(char const *s, unsigned int start, size_t len)
 {
-        char	*str;
-        size_t	s_len;
+		char	*str;
+		size_t	s_len;
 
-        if (s == NULL)
-                return (NULL);
-        s_len = ft_strlen(s);
+		if (s == NULL)
+			return (NULL);
+		s_len = ft_strlen(s);
         if (start >= s_len)
                 return (ft_strdup(""));
         if (start + len > s_len)
@@ -37,7 +37,7 @@ int	fill_line_buffer(char **line_buffer, char *buffer)
 	char	*newline_pos;
 	
 	newline_pos = ft_strchr(buffer, '\n');
-	if (newline_pos != NULL) // \n 발견한경우.
+	if (newline_pos != NULL)
 	{
 		length = ft_strlen(buffer) - ft_strlen(newline_pos);
 		*line_buffer = ft_substr(buffer, 0, length + 1);
@@ -46,13 +46,13 @@ int	fill_line_buffer(char **line_buffer, char *buffer)
 	else if ((buffer == NULL) || (ft_strlen(buffer) < BUFFER_SIZE))
 	{
 		*line_buffer = ft_strjoin(buffer, "\n");
-		return (0); // \0 으로 문서 끝남
+		return (0);
 	}
 	else
 	{
 		*line_buffer = NULL;
 		*line_buffer = ft_strdup(buffer);
-		return (-1); // \n 발견 못하고 문서도 안끝남
+		return (-1);
 	}
 }
 
@@ -80,7 +80,7 @@ char	*get_next_line(int fd)
 
 	if (fd < 0 || BUFFER_SIZE < 1 || !(buffer = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1))))
 		return (NULL);
-
+	
 	while ((read_size = read(fd, buffer, BUFFER_SIZE)) >= 0)
 	{
 		buffer[read_size] = '\0';
@@ -93,9 +93,8 @@ char	*get_next_line(int fd)
 		}
 	}
 	free(buffer);
-    return (NULL);
+	return (NULL);
 }
-
 
 /*
 #include <fcntl.h>
@@ -144,4 +143,3 @@ int main(void)
     return (0);
 }
 */
-
