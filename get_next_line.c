@@ -6,7 +6,7 @@
 /*   By: hyunski2 <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/05/02 13:37:32 by hyunski2          #+#    #+#             */
-/*   Updated: 2024/06/11 16:17:07 by hyunski2         ###   ########.fr       */
+/*   Updated: 2024/06/11 16:29:46 by hyunski2         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,21 +21,21 @@ char	*ft_substr(char const *s, unsigned int start, size_t len)
 		return (NULL);
 	s_len = ft_strlen(s);
 	if (start >= s_len)
-    	return (ft_strdup(""));
-    if (start + len > s_len)
-    	len = s_len - start;
-    str = (char *)malloc(sizeof(char) * (len + 1));
+		return (ft_strdup(""));
+	if (start + len > s_len)
+		len = s_len - start;
+	str = (char *)malloc(sizeof(char) * (len + 1));
 	if (str == NULL)
-        return (NULL);
+		return (NULL);
 	ft_strlcpy(str, s + start, len + 1);
-    return (str);
+	return (str);
 }
 
 int	fill_line_buffer(char **line_buffer, char *buffer)
 {
 	size_t	length;
 	char	*newline_pos;
-	
+
 	newline_pos = ft_strchr(buffer, '\n');
 	if (newline_pos != NULL)
 	{
@@ -78,9 +78,11 @@ char	*get_next_line(int fd)
 	ssize_t		read_size;
 	int			i;
 
-	if (fd < 0 || BUFFER_SIZE < 1 || !(buffer = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1))))
+	buffer = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
+	if (fd < 0 || BUFFER_SIZE < 1 || !buffer)
 		return (NULL);
-	while ((read_size = read(fd, buffer, BUFFER_SIZE)) >= 0)
+	read_size = read(fd, buffer, BUFFER_SIZE);
+	while (read_size >= 0)
 	{
 		buffer[read_size] = '\0';
 		i = fill_line_buffer(&line_buffer, buffer);
