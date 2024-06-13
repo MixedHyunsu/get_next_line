@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "get_next_line.h"
+//#include<stdio.h>
 
 char	*ft_substr(char const *s, unsigned int start, size_t len)
 {
@@ -45,7 +46,7 @@ int	fill_line_buffer(char **line_buffer, char *buffer)
 	}
 	else if ((buffer == NULL) || (ft_strlen(buffer) < BUFFER_SIZE))
 	{
-		*line_buffer = ft_strjoin(buffer, "\n");
+		*line_buffer = ft_strjoin(buffer, "\0");
 		return (0);
 	}
 	else
@@ -61,15 +62,20 @@ void	set_line(char **left_c, char *line_buffer)
 	char	*tmp;
 
 	if (*left_c == NULL)
+	{
 		*left_c = ft_strdup(line_buffer);
+//		printf("%s\n", line_buffer);
+		free(line_buffer);
+	}
 	else
 	{
 		tmp = ft_strjoin(*left_c, line_buffer);
+//		printf("%s\n", line_buffer);
+		free(line_buffer);
 		*left_c = NULL;
 		*left_c = tmp;
 	}
 }
-
 char	*get_next_line(int fd)
 {
 	char		*buffer;
@@ -78,22 +84,24 @@ char	*get_next_line(int fd)
 	ssize_t		read_size;
 	int			i;
 
-	buffer = (char *)malloc(sizeof(char) * (BUFFER_SIZE + 1));
+	read_size = BUFFER_SIZE;
+	buffer = (char *)malloc(sizeof(char) * BUFFER_SIZE + 1);
 	if (fd < 0 || BUFFER_SIZE < 1 || !buffer)
 		return (NULL);
-	read_size = read(fd, buffer, BUFFER_SIZE);
-	while (read_size >= 0)
+	while (read_size == BUFFER_SIZE)
 	{
+		read_size = read(fd, buffer, BUFFER_SIZE);
 		buffer[read_size] = '\0';
 		i = fill_line_buffer(&line_buffer, buffer);
 		set_line(&left_c, line_buffer);
-		if ((i >= 0) || (read_size == 0))
+		if (i >= 0)
 		{
 			free(buffer);
+			free(left_c);
 			return (left_c);
 		}
 	}
-	free(buffer);
+//	printf("%s/n", left_c);
 	return (NULL);
 }
 
@@ -116,7 +124,7 @@ int main(void)
 		free(line);
 		close(fd);
 	}
-
+	return (0);
 }
 
 int main(void)
