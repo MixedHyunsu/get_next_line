@@ -11,121 +11,98 @@
 /* ************************************************************************** */
 
 #include "get_next_line.h"
-//#include<stdio.h>
-
-char	*ft_substr(char const *s, unsigned int start, size_t len)
+static char	*ft_strchr(const char *s, int c)
 {
-	char	*str;
-	size_t	s_len;
+	int	i;
 
-	if (s == NULL)
-		return (NULL);
-	s_len = ft_strlen(s);
-	if (start >= s_len)
-		return (ft_strdup(""));
-	if (start + len > s_len)
-		len = s_len - start;
-	str = (char *)malloc(sizeof(char) * (len + 1));
-	if (str == NULL)
-		return (NULL);
-	ft_strlcpy(str, s + start, len + 1);
-	return (str);
+	i = 0;
+	while (s[i] != (char)c)
+	{
+		if (s[i] == '\0')
+			return (NULL);
+		i++;
+	}
+	return ((char *)&s[i]);
 }
 
-int	fill_line_buffer(char **line_buffer, char *buffer)
+static char	*set_line(char *line_buffer)
 {
-	size_t	length;
-	char	*newline_pos;
+	char	*left_c;
+	int		i;
 
-	newline_pos = ft_strchr(buffer, '\n');
-	if (newline_pos != NULL)
-	{
-		length = ft_strlen(buffer) - ft_strlen(newline_pos);
-		*line_buffer = ft_substr(buffer, 0, length + 1);
-		return (length + 1);
-	}
-	else if ((buffer == NULL) || (ft_strlen(buffer) < BUFFER_SIZE))
-	{
-		*line_buffer = ft_strjoin(buffer, "\0");
-		return (0);
-	}
-	else
-	{
-		*line_buffer = NULL;
-		*line_buffer = ft_strdup(buffer);
-		return (-1);
-	}
-}
-
-void	set_line(char **left_c, char *line_buffer)
-{
-	char	*tmp;
-
-	if (*left_c == NULL)
-	{
-		*left_c = ft_strdup(line_buffer);
-//		printf("%s\n", line_buffer);
-		free(line_buffer);
-	}
-	else
-	{
-		tmp = ft_strjoin(*left_c, line_buffer);
-//		printf("%s\n", line_buffer);
-		free(line_buffer);
-		*left_c = NULL;
-		*left_c = tmp;
-	}
-}
-char	*get_next_line(int fd)
-{
-	char		*buffer;
-	char		*line_buffer;
-	static char	*left_c;
-	ssize_t		read_size;
-	int			i;
-
-	read_size = BUFFER_SIZE;
-	buffer = (char *)malloc(sizeof(char) * BUFFER_SIZE + 1);
-	if (fd < 0 || BUFFER_SIZE < 1 || !buffer)
+	i = 0;
+	while (line_buffer[i] != '\n' && line_buffer[i] != '\0')
+		i++;
+	if (line_buffer[i] == 0 || line_buffer[1] == 0)
 		return (NULL);
-	while (read_size == BUFFER_SIZE)
+	left_c = ft_substr(line_buffer, i + 1, ft_strlen(line_buffer) - i);
+	if (*left_c == 0)
+	{
+		free(left_c);
+		left_c = NULL;
+	}
+	line_buffer[i + 1] = '\0';
+	return (left_c);
+}
+
+static char	*fill_line_buffer(char *left_c, char *buffer, int fd)
+{
+	char	*stock;
+	ssize_t	read_size;
+
+	read_size = 1;
+	while (read_size > 0)
 	{
 		read_size = read(fd, buffer, BUFFER_SIZE);
-		buffer[read_size] = '\0';
-		i = fill_line_buffer(&line_buffer, buffer);
-		set_line(&left_c, line_buffer);
-		if (i >= 0)
+		if (read_size == -1)
 		{
-			free(buffer);
 			free(left_c);
-			return (left_c);
+			return (NULL);
 		}
+		else if (read_size == 0)
+			break;
+		buffer[read_size] = '\0';
+		if (!left_c)
+			left_c = ft_strdup("");
+		stock = left_c;
+		left_c = ft_strjoin(stock, buffer);
+		free (stock);
+		stock = NULL;
+		if (ft_strchr(buffer, '\n'))
+			break;
 	}
-//	printf("%s/n", left_c);
-	return (NULL);
+	return (left_c);
+}
+
+char	*get_next_line(int fd)
+{
+	char		*line_buffer;
+	char		*buffer;
+	static char	*left_c;
+
+	buffer = (char *)malloc(sizeof(char) * BUFFER_SIZE + 1);
+	if (fd < 0 || BUFFER_SIZE <= 0 || !buffer || read(fd, 0, 0) < 0)
+	{
+		free(buffer);
+		free(left_c);
+		left_c = NULL;
+		buffer = NULL;
+		return (NULL);
+	}
+	line_buffer = fill_line_buffer(left_c, buffer, fd);
+	free(buffer);
+	buffer = NULL;
+	if (!line_buffer)
+		return (NULL);
+	left_c = set_line(line_buffer);
+	return (line_buffer);
 }
 
 /*
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-int main(void)
-{
-	int fd;
-	fd = open("./text.txt", O_RDONLY);
-	if (fd == -1)
-		printf("file open error");
-	else
-	{
-		char	*line = get_next_line(fd);
-		printf("%s", line);
-		printf("hi\n");
-		free(line);
-		close(fd);
-	}
-	return (0);
-}
+#include <stdio.h>
 
 int main(void)
 {
@@ -144,11 +121,12 @@ int main(void)
     while ((line = get_next_line(fd)) != NULL)
     {
         printf("%s\n", line);
-        free(line);
+        //free(line);
     }
 
     // Close the file
     close(fd);
     return (0);
 }
+
 */
